@@ -20,4 +20,5 @@ RESTART_COMMAND=$INOTIFY_PATH'launch_inotify.sh --path='
 # Log folder
 LOG_FOLDER=$INOTIFY_PATH'logs/'
 
-
+# Date format
+DATE_FORMAT='%Y/%m/%d %H:%M:%S'

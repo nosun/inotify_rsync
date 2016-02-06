@@ -1,11 +1,10 @@
 #!/bin/bash
 
-. /etc/profile
-. /inotify_rsync/variables
+. /inotify_rsync/init.sh
 
 # Making sure we are running as sudo
 if [ "$EUID" -ne 0 ] ; then
-	printf "$0: Please run as root\n" >> $LOG_FOLDER'general.err'
+	printf "$(date +"$DATE_FORMAT") $0: Please run as root\n" >> $LOG_FOLDER'general.err'
         exit 1
 fi
 
@@ -33,7 +32,7 @@ while [ $# -gt 0 ]; do
 			print_help
 			;;
 		*)
-			printf "$0: Error: Invalid argument, run --help for valid arguments.\n" >> $LOG_FOLDER'general.err'
+			printf "$(date +"$DATE_FORMAT") $0: Error: Invalid argument, run --help for valid arguments.\n" >> $LOG_FOLDER'general.err'
 			print_help
 	esac
 	shift
@@ -41,7 +40,7 @@ done
 
 # Making sure path is valid
 if [ -z "${WATCH_PATH}" ] || [ ! -d "${WATCH_PATH}" ] ; then
-	printf "$0: Error: Please provide a valid path.\n" >> $LOG_FOLDER'general.err'
+	printf "$(date +"$DATE_FORMAT") $0: Error: Please provide a valid path.\n" >> $LOG_FOLDER'general.err'
 	exit 1
 fi
 
@@ -49,7 +48,7 @@ fi
 function replicate {
 	if [ $1 ] && [ -f $HOSTS_FILE ] ; then
 		while read HOST; do
-			rsync -aRrzq --rsync-path='sudo rsync' $1 ${HOST}:/ 1>/dev/null 2>>$LOG_FOLDER'launch_inotify.err'
+			rsync -aRrzi --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
 		done < $HOSTS_FILE
 	fi
 }
@@ -58,7 +57,7 @@ function replicate {
 function remove {
 	if [ $1 ] && [ -f $HOSTS_FILE ] ; then
 		while read HOST; do
-			ssh ${HOST} 'sudo rm -r '$1' 1>/dev/null 2>>'$LOG_FOLDER'launch_inotify.err'
+			ssh ${HOST} "sudo rm -rv $1" | sed -e "s#^#$(date +"$DATE_FORMAT") #" >> $LOG_FOLDER'launch_inotify_rm.log'
 		done < $HOSTS_FILE
 	fi
 }
@@ -81,4 +80,4 @@ while read -r FULL_PATH EVENT ; do
 	else
 		replicate $FULL_PATH
 	fi
-done < <(exec inotifywait -m -r -q -e modify,attrib,close_write,move,create,delete,delete_self --format '%w%f %e' $WATCH_PATH)
+done < <(exec inotifywait -mrqe modify,attrib,close_write,move,create,delete,delete_self --format '%w%f %e' $WATCH_PATH)
