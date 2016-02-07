@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./app/init.sh
+. /inotify_rsync/app/init.sh
 
 # Making sure we are running as sudo
 if [ "$EUID" -ne 0 ] ; then

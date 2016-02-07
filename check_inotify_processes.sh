@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./app/init.sh
+. /inotify_rsync/app/init.sh
 
 PROCESSES=( $(pgrep $EXECUTABLE) )
 
