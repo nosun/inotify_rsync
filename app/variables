@@ -3,11 +3,13 @@
 # Path to watch and sync
 WATCH_PATH=''
 
+# Where files, necessary for script functioning will reside
+DATA_FOLDER=$ROOT'/data'
 # Hosts to sync to
-HOSTS_FILE=$ROOT'/hosts.list'
+HOSTS_FILE=$DATA_FOLDER'/hosts.list'
 
 # List of the domains we need to check
-DOMAINS_FILE=$ROOT'/domains.list'
+DOMAINS_FILE=$DATA_FOLDER'/domains.list'
 
 # Filename, without extension responsible for monitoring
 EXECUTABLE='launch_inotify'
