@@ -1,7 +1,10 @@
 #!/bin/bash
 
+ROOT='/inotify_rsync'
+
 . /etc/profile
-. /inotify_rsync/variables
+. $ROOT/variables
+. $ROOT/functions
 
 if [ ! -d $LOG_FOLDER ] ; then
 	mkdir -p $LOG_FOLDER

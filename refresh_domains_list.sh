@@ -1,24 +1,12 @@
 #!/bin/bash
 
-. /inotify_rsync/init.sh
+. ./init.sh
 
 # Making sure we are running as sudo
 if [ "$EUID" -ne 0 ] ; then
 	printf "$(date +"$DATE_FORMAT") $0: Please run as root\n" >> $LOG_FOLDER'general.err'
 	exit 1
 fi
-
-# Show some help
-function print_help() {
-	cat <<-HELP
-		This script is used to refresh list of physical file locations for our domains, which will be used by sync script later.
-		You need to provide the following arguments:
-			1) Full path to file to dump destinations
-		Usage: (sudo) bash ${0##*/} --dump_to=PATH_TO_FILE
-		Example: (sudo) bash ${0##*/} --dump_to=/tmp/hosts.list
-	HELP
-	exit 0
-}
 
 # Parse Command Line Arguments
 while [ $# -gt 0 ]; do
@@ -27,11 +15,11 @@ while [ $# -gt 0 ]; do
                         DOMAINS_FILE="${1#*=}"
                         ;;
                 --help)
-                        print_help
+                        print_refresh_domains_list_help
                         ;;
                 *)
                         printf "$(date +"$DATE_FORMAT") $0: Error: Invalid argument, run --help for valid arguments.\n" >> $LOG_FOLDER'general.err'
-                        print_help
+			print_refresh_domains_list_help
         esac
         shift
 done
@@ -53,6 +41,7 @@ else
         fi
 fi
 
+# Refreshing the file based on Plesk hosts list
 if [ -f "/etc/psa/.psa.shadow" ] ; then
         mysql -u admin -p`cat /etc/psa/.psa.shadow` -e 'SELECT www_root FROM psa.hosting' -NB 2>> $LOG_FOLDER'refresh_domains_list.err' 1>$DOMAINS_FILE
 else

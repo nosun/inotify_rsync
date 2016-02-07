@@ -1,25 +1,12 @@
 #!/bin/bash
 
-. /inotify_rsync/init.sh
+. ./init.sh
 
 # Making sure we are running as sudo
 if [ "$EUID" -ne 0 ] ; then
 	printf "$(date +"$DATE_FORMAT") $0: Please run as root\n" >> $LOG_FOLDER'general.err'
         exit 1
 fi
-
-
-# Show some help
-function print_help() {
-	cat <<-HELP
-		This script is used to sync folders between instances based on inotifywait reports.
-		You need to provide the following arguments:
-			1) Full path to watch
-		Usage: (sudo) bash ${0##*/} --path=PATH
-		Example: (sudo) bash ${0##*/} --path=/var/www/vhosts/website/httpdocs
-	HELP
-	exit 0
-}
 
 # Parse Command Line Arguments
 while [ $# -gt 0 ]; do
@@ -29,11 +16,11 @@ while [ $# -gt 0 ]; do
 			WATCH_PATH="${WATCH_PATH%/}" # removing trailing slash to avoid confusion later
 			;;
 		--help)
-			print_help
+			print_launch_inotify_help
 			;;
 		*)
 			printf "$(date +"$DATE_FORMAT") $0: Error: Invalid argument, run --help for valid arguments.\n" >> $LOG_FOLDER'general.err'
-			print_help
+			print_launch_inotify_help
 	esac
 	shift
 done
@@ -43,24 +30,6 @@ if [ -z "${WATCH_PATH}" ] || [ ! -d "${WATCH_PATH}" ] ; then
 	printf "$(date +"$DATE_FORMAT") $0: Error: Please provide a valid path.\n" >> $LOG_FOLDER'general.err'
 	exit 1
 fi
-
-# Create new
-function replicate {
-	if [ $1 ] && [ -f $HOSTS_FILE ] ; then
-		while read HOST; do
-			rsync -aRrzi --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
-		done < $HOSTS_FILE
-	fi
-}
-
-# Remove obsolete
-function remove {
-	if [ $1 ] && [ -f $HOSTS_FILE ] ; then
-		while read HOST; do
-			ssh ${HOST} "sudo rm -rv $1" | sed -e "s#^#$(date +"$DATE_FORMAT") #" >> $LOG_FOLDER'launch_inotify_rm.log'
-		done < $HOSTS_FILE
-	fi
-}
 
 # Establishing watch
 while read -r FULL_PATH EVENT ; do

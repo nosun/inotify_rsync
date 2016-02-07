@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Sync folders
+function synchronize {
+        if [ $1 ] && [ -f $HOSTS_FILE ] ; then
+                while read HOST; do
+                        rsync -aRrzi --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                done < $HOSTS_FILE
+        fi
+}
+
+# Create new
+function replicate {
+        if [ $1 ] && [ -f $HOSTS_FILE ] ; then
+                while read HOST; do
+                        rsync -aRrzi --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                done < $HOSTS_FILE
+        fi
+}
+
+# Remove obsolete
+function remove {
+        if [ $1 ] && [ -f $HOSTS_FILE ] ; then
+                while read HOST; do
+                        ssh ${HOST} "sudo rm -rv $1" | sed -e "s#^#$(date +"$DATE_FORMAT") #" >> $LOG_FOLDER'launch_inotify_rm.log'
+                done < $HOSTS_FILE
+        fi
+}
+
+# Show some help
+function print_check_inotify_processes_help() {
+	cat <<-HELP
+                This script is used to check if there is inotify process running for each host. And restart watch if it's not running
+                You need to provide the following arguments:
+                        1) Full path to file with domains locations
+                Usage: (sudo) bash ${0##*/} --domains_source=PATH
+                Example: (sudo) bash ${0##*/} --domains_source=/tmp/hosts.list
+	HELP
+        exit 0
+}
+
+# Show some help
+function print_launch_inotify_help() {
+	cat <<-HELP
+                This script is used to sync folders between instances based on inotifywait reports.
+                You need to provide the following arguments:
+                        1) Full path to watch
+                Usage: (sudo) bash ${0##*/} --path=PATH
+                Example: (sudo) bash ${0##*/} --path=/var/www/vhosts/website/httpdocs
+	HELP
+        exit 0
+}
+
+# Show some help
+function print_refresh_domains_list_help() {
+	cat <<-HELP
+                This script is used to refresh list of physical file locations for our domains, which will be used by sync script later.
+                You need to provide the following arguments:
+                        1) Full path to file to dump destinations
+                Usage: (sudo) bash ${0##*/} --dump_to=PATH_TO_FILE
+                Example: (sudo) bash ${0##*/} --dump_to=/tmp/hosts.list
+	HELP
+        exit 0
+}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /inotify_rsync/init.sh
+. ./init.sh
 
 PROCESSES=( $(pgrep $EXECUTABLE) )
 
@@ -10,18 +10,6 @@ if [ "$EUID" -ne 0 ] ; then
 	exit 1
 fi
 
-# Show some help
-function print_help() {
-	cat <<-HELP
-		This script is used to check if there is inotify process running for each host. And restart watch if it's not running
-		You need to provide the following arguments:
-			1) Full path to file with domains locations
-		Usage: (sudo) bash ${0##*/} --domains_source=PATH
-		Example: (sudo) bash ${0##*/} --domains_source=/tmp/hosts.list
-	HELP
-	exit 0
-}
-
 # Parse Command Line Arguments
 while [ $# -gt 0 ]; do
         case "$1" in
@@ -29,11 +17,11 @@ while [ $# -gt 0 ]; do
                         DOMAINS_FILE="${1#*=}"
                         ;;
                 --help)
-                        print_help
+                        print_check_inotify_processes_help
                         ;;
                 *)
                         printf "$(date +"$DATE_FORMAT") $0: Error: Invalid argument, run --help for valid arguments.\n" >> $LOG_FOLDER'general.err'
-                        print_help
+			print_check_inotify_processes_help
         esac
         shift
 done
@@ -43,15 +31,6 @@ if [ -z "$DOMAINS_FILE" ] || [ ! -f "$DOMAINS_FILE" ]; then
         printf "$(date +"$DATE_FORMAT") $0: Error: Can't find domains file. Please check file path and make sure file is readable.\n" >> $LOG_FOLDER'general.err'
         exit 1
 fi
-
-# Sync folders
-function synchronize {
-        if [ $1 ] && [ -f $HOSTS_FILE ] ; then
-                while read HOST; do
-                        rsync -aRrzi --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
-                done < $HOSTS_FILE
-        fi
-}
 
 declare -A DOMAINS_RUNNING
 
@@ -71,7 +50,7 @@ if [ -f $DOMAINS_FILE ] ; then
 			printf '%s\n' "$MSG Check logs for more details."
 
 			printf "$(date +"$DATE_FORMAT") $0: Doing initial rsync before initiating a watch.\n" >> $LOG_FOLDER'general.err'
-			synchronize $DOMAIN
+			synchronize $DOMAIN	# functions include
 
 			printf "$(date +"$DATE_FORMAT") $0: Initiating a watch.\n" >> $LOG_FOLDER'general.err'
 			nohup $RESTART_COMMAND$DOMAIN 1>>$LOG_FOLDER'check_inotify_processes.log' 2>> $LOG_FOLDER'check_inotify_processes.err' &

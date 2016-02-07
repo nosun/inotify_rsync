@@ -1,24 +1,22 @@
 #!/bin/bash
 
-INOTIFY_PATH='/inotify_rsync/'
-
 # Path to watch and sync
 WATCH_PATH=''
 
 # Hosts to sync to
-HOSTS_FILE=$INOTIFY_PATH'hosts.list'
+HOSTS_FILE=$ROOT'/hosts.list'
 
 # List of the domains we need to check
-DOMAINS_FILE=$INOTIFY_PATH'domains.list'
+DOMAINS_FILE=$ROOT'/domains.list'
 
 # Filename, without extension responsible for monitoring
 EXECUTABLE='launch_inotify'
 
 # Command will be used to restart watch
-RESTART_COMMAND=$INOTIFY_PATH'launch_inotify.sh --path='
+RESTART_COMMAND=$ROOT'/launch_inotify.sh --path='
 
 # Log folder
-LOG_FOLDER=$INOTIFY_PATH'logs/'
+LOG_FOLDER=$ROOT'/logs/'
 
 # Date format
 DATE_FORMAT='%Y/%m/%d %H:%M:%S'
