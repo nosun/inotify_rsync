@@ -44,6 +44,15 @@ if [ -z "$DOMAINS_FILE" ] || [ ! -f "$DOMAINS_FILE" ]; then
         exit 1
 fi
 
+# Sync folders
+function synchronize {
+        if [ $1 ] && [ -f $HOSTS_FILE ] ; then
+                while read HOST; do
+                        rsync -aRrzi --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                done < $HOSTS_FILE
+        fi
+}
+
 declare -A DOMAINS_RUNNING
 
 for PID in "${PROCESSES[@]}" ; do
@@ -55,8 +64,17 @@ done
 if [ -f $DOMAINS_FILE ] ; then
 	while read DOMAIN; do
 		if [ ! ${DOMAINS_RUNNING[$DOMAIN]+_} ] ; then
-			printf "$(date +"$DATE_FORMAT") $0: Error. Watch for $DOMAIN is not running, restarting ...\n" >> $LOG_FOLDER'general.err'
-			nohup $RESTART_COMMAND$DOMAIN 1>>$LOG_FOLDER'check_inotify_processes.log' 2>>$LOG_FOLDER'check_inotify_processes.err' &
+			MSG=$(date "+$DATE_FORMAT")" $0: Error. Watch for $DOMAIN is not running, restarting ..."
+			# One for log
+			printf $MSG"\n" >> $LOG_FOLDER'general.err'
+			# One for crontab notifications
+			printf '%s\n' "$MSG Check logs for more details."
+
+			printf "$(date +"$DATE_FORMAT") $0: Doing initial rsync before initiating a watch.\n" >> $LOG_FOLDER'general.err'
+			synchronize $DOMAIN
+
+			printf "$(date +"$DATE_FORMAT") $0: Initiating a watch.\n" >> $LOG_FOLDER'general.err'
+			nohup $RESTART_COMMAND$DOMAIN 1>>$LOG_FOLDER'check_inotify_processes.log' 2>> $LOG_FOLDER'check_inotify_processes.err' &
 		fi
 	done < $DOMAINS_FILE
 fi
