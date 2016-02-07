@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./init.sh
+. ./app/init.sh
 
 # Making sure we are running as sudo
 if [ "$EUID" -ne 0 ] ; then

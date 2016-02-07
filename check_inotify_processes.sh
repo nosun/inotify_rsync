@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./init.sh
+. ./app/init.sh
 
 PROCESSES=( $(pgrep $EXECUTABLE) )
 
