@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT='/inotify_rsync'
+ROOT=$(pwd)
 
 . /etc/profile
 . $ROOT/variables
