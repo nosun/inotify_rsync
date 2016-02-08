@@ -4,7 +4,7 @@
 function synchronize {
         if [ $1 ] && [ -f $HOSTS_FILE ] ; then
                 while read HOST; do
-                        rsync -aRrzi --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                        rsync -aRrzi --exclude='.git' --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
                 done < $HOSTS_FILE
         fi
 }
@@ -13,7 +13,7 @@ function synchronize {
 function replicate {
         if [ $1 ] && [ -f $HOSTS_FILE ] ; then
                 while read HOST; do
-                        rsync -aRrzi --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                        rsync -aRrzi --exclude='.git' --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
                 done < $HOSTS_FILE
         fi
 }

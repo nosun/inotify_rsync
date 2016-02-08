@@ -49,4 +49,4 @@ while read -r FULL_PATH EVENT ; do
 	else
 		replicate $FULL_PATH
 	fi
-done < <(exec inotifywait -mrqe modify,attrib,close_write,move,create,delete,delete_self --format '%w%f %e' $WATCH_PATH)
+done < <(exec inotifywait -mrqe modify,attrib,close_write,move,create,delete,delete_self --format '%w%f %e' --exclude '.git' $WATCH_PATH)
