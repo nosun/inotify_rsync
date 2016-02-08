@@ -43,7 +43,7 @@ fi
 
 # Refreshing the file based on Plesk hosts list
 if [ -f "/etc/psa/.psa.shadow" ] ; then
-        mysql -u admin -p`cat /etc/psa/.psa.shadow` -e 'SELECT www_root FROM psa.hosting' -NB 2>> $LOG_FOLDER'refresh_domains_list.err' 1>$DOMAINS_FILE
+        mysql -u admin -p`cat /etc/psa/.psa.shadow` -e 'SELECT DISTINCT www_root FROM psa.hosting' -NB 2>> $LOG_FOLDER'refresh_domains_list.err' 1>$DOMAINS_FILE
 else
         printf "$(date +"$DATE_FORMAT") $0: Error: Can't find plesk authentication file. Are you running plesk?\n" >> $LOG_FOLDER'general.err'
 fi
