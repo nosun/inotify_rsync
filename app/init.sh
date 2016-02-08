@@ -2,7 +2,9 @@
 
 ROOT='/inotify_rsync'
 
-. /etc/profile
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
 . $ROOT/app/variables
 . $ROOT/app/functions
 
