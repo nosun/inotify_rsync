@@ -20,14 +20,9 @@ else
 	fi
 fi
 
-# Making sure file is valid
-if [ -z "$DOMAINS_FILE" ] || [ ! -f "$DOMAINS_FILE" ]; then
-        printf "$(date +"$DATE_FORMAT") $0: Error: Can't find domains file. Please check file path and make sure file is readable.\n" 
-        exit 1
-fi
-
-if [ -f $DOMAINS_FILE ] ; then
-        while read DOMAIN; do
-	        synchronize $1
-        done < $DOMAINS_FILE
+# Sync folders
+if [ -f $HOSTS_FILE ] ; then
+	while read HOST; do
+		rsync -aRrzi --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/
+	done < $HOSTS_FILE
 fi
