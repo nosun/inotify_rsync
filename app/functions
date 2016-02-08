@@ -4,7 +4,7 @@
 function synchronize {
         if [ $1 ] && [ -f $HOSTS_FILE ] ; then
                 while read HOST; do
-                        rsync -aRrzi --exclude='.git' --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                        rsync -aRrzq --exclude='.git' --delete --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
                 done < $HOSTS_FILE
         fi
 }
@@ -13,7 +13,7 @@ function synchronize {
 function replicate {
         if [ $1 ] && [ -f $HOSTS_FILE ] ; then
                 while read HOST; do
-                        rsync -aRrzi --exclude='.git' --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
+                        rsync -aRrzq --exclude='.git' --rsync-path='sudo rsync' --log-format='%t [%p] %i /%f' $1 ${HOST}:/ 1>> $LOG_FOLDER'launch_inotify_rsync.log' 2>> $LOG_FOLDER'launch_inotify_rsync.err'
                 done < $HOSTS_FILE
         fi
 }
@@ -22,7 +22,7 @@ function replicate {
 function remove {
         if [ $1 ] && [ -f $HOSTS_FILE ] ; then
                 while read HOST; do
-                        ssh ${HOST} "sudo rm -rv $1" | sed -e "s#^#$(date +"$DATE_FORMAT") #" >> $LOG_FOLDER'launch_inotify_rm.log'
+                        ssh ${HOST} "sudo rm -r $1" | sed -e "s#^#$(date +"$DATE_FORMAT") #" >> $LOG_FOLDER'launch_inotify_rm.log'
                 done < $HOSTS_FILE
         fi
 }
