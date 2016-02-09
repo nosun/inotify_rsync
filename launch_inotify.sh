@@ -32,7 +32,7 @@ if [ -z "${WATCH_PATH}" ] || [ ! -d "${WATCH_PATH}" ] ; then
 fi
 
 # Establishing watch
-while read -r FULL_PATH EVENT ; do
+while read -r EVENT FULL_PATH ; do
 	if [[ $EVENT == *"DELETE_SELF"* && "${FULL_PATH%/}" == "$WATCH_PATH" ]] ; then
 		# Need to remove inotifywait process as well. It is running as child process
 		# Can't use group ID as this script will be primarily called from another script
@@ -45,8 +45,8 @@ while read -r FULL_PATH EVENT ; do
 		kill $$
 		exit 1
 	elif [[ $EVENT == *"DELETE"* || $EVENT == *"MOVED_FROM"* ]] ; then
-		remove $FULL_PATH
+		remove "$FULL_PATH"
 	else
-		replicate $FULL_PATH
+		replicate "$FULL_PATH"
 	fi
-done < <(exec inotifywait -mrqe modify,close_write,move,create,delete,delete_self --format '%w%f %e' --exclude '.git' $WATCH_PATH)
+done < <(exec inotifywait -mrqe modify,close_write,move,create,delete,delete_self --format="%e \"%w%f\"" --exclude '.git' "$WATCH_PATH")
