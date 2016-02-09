@@ -37,12 +37,12 @@ declare -A DOMAINS_RUNNING
 for PID in "${PROCESSES[@]}" ; do
 	PROCESS=`ps -fp $PID`
 	DOMAIN=`expr match "$PROCESS" "[^']\+--path=\([^']\+\)"`
-	DOMAINS_RUNNING[$DOMAIN]=1
+	DOMAINS_RUNNING["$DOMAIN"]=1
 done
 
-if [ -f $DOMAINS_FILE ] ; then
+if  [ -f "$DOMAINS_FILE" ] ; then
 	while read DOMAIN; do
-		if [ ! ${DOMAINS_RUNNING[$DOMAIN]+_} ] ; then
+		if [ ! -z "$DOMAIN" ] && [ ! ${DOMAINS_RUNNING["$DOMAIN"]+_} ] ; then
 			MSG=$(date "+$DATE_FORMAT")" $0: Error. Watch for $DOMAIN is not running, restarting ..."
 			# One for log
 			printf $MSG"\n" >> $LOG_FOLDER'general.err'
